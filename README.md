@@ -1,2 +1,2 @@
-# aibq.api.webapp
-Laravel webapp for AIBQ
+# itbookmarks.api.webapp
+Laravel webapp for ITBOOKMARKS
