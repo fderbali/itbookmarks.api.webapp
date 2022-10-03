@@ -1,0 +1,67 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+      - dev
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14.1-alpine
+        env:
+          POSTGRES_DB: aibq_test
+          POSTGRES_PASSWORD: api
+          POSTGRES_USER: api
+        ports:
+        - 55432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - name: Install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Get Composer Cache Directory
+      working-directory: ./src
+      id: composer-cache
+      run: |
+        echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+    - name: Cache Composer Directory
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    - name: Composer Install
+      working-directory: ./src
+      run: composer install --no-scripts --no-ansi --prefer-dist
+
+    - name: Setup Laravel Application
+      working-directory: ./src
+      run: |
+        php -r "file_exists('.env') || copy('.env.testing', '.env');"
+        php artisan key:generate
+
+    - name: Execute tests (Unit and Feature tests) via PHPUnit
+      working-directory: ./src
+      env:
+        ROOT_DB_PASSWORD: root
+        DB_HOST: 127.0.0.1
+        DB_PORT: 55432
+        DB_DATABASE: aibq_test
+        DB_USERNAME: api
+        DB_PASSWORD: api
+      run: |
+        vendor/bin/phpunit

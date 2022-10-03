@@ -1,0 +1,17 @@
+**/Dockerfile*
+**/docker-compose*
+.dockerignore
+**/.git*
+**/README.md
+**/LICENSE
+**/.editorconfig
+**/.phpunit*
+**/.env
+
+src/bootstrap/cache/services.php
+src/vendor
+src/storage/app/*
+src/storage/framework/cache/*
+src/storage/framework/sessions/*
+src/storage/framework/views/*
+src/storage/logs/*
