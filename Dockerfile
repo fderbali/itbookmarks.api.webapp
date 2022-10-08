@@ -14,7 +14,7 @@ ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
 RUN apk update && apk --no-cache add curl \
     # PHP libraries
     php8-bcmath php8-ctype php8-curl php8-dom php8-fileinfo php8-gd php8-iconv php8-json \
-    php8-mbstring php8-openssl php8-pdo libpq-dev postgresql-client php8-phar php8-session php8-simplexml \
+    php8-mbstring php8-openssl php8-pdo php8-pdo_mysql php8-phar php8-session php8-simplexml \
     php8-tokenizer php8-xml php8-xmlreader php8-xmlwriter php8-xsl php8-zip \
     # Required by the xsl extension
     libxslt-dev libgcrypt-dev \
@@ -24,8 +24,7 @@ RUN apk update && apk --no-cache add curl \
     freetype-dev libjpeg-turbo-dev libpng-dev
 
 # Install extensions
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install bcmath opcache pdo pdo_pgsql pgsql xsl zip
+RUN docker-php-ext-install bcmath opcache pdo_mysql xsl zip
 
 # Configure and install the gd extension
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -58,3 +57,6 @@ FROM composer as development
 # Enable opcache timestamps
 # Allows to make changes in realtime (respect file timestamps)
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="1"
+
+# Install some extra packages
+RUN apk --no-cache add bash mysql-client ca-certificates
